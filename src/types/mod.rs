@@ -176,6 +176,24 @@ pub trait ToSql {
     fn to_sql(&self, val: &mut SqlValue) -> Result<()>;
 }
 
+impl<'a, T: ToSql> ToSql for &'a T {
+    fn oratype(&self) -> Result<OracleType> {
+        (**self).oratype()
+    }
+    fn to_sql(&self, val: &mut SqlValue) -> Result<()> {
+        (**self).to_sql(val)
+    }
+}
+
+impl<'a> ToSql for &'a dyn ToSql {
+    fn oratype(&self) -> Result<OracleType> {
+        (**self).oratype()
+    }
+    fn to_sql(&self, val: &mut SqlValue) -> Result<()> {
+        (**self).to_sql(val)
+    }
+}
+
 macro_rules! impl_from_sql {
     ($type:ty, $func:ident) => {
         impl FromSql for $type {
